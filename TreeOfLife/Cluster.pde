@@ -20,7 +20,7 @@ class Cluster {
     String toString() {
         return traits.toString() + 
         "\n\t" + (child1 == null ? "" : child1.toString()) +
-        "\n\t" + (child2 == null ? "" : child2.toString());
+        "\t" + (child2 == null ? "" : child2.toString());
 
     }
 }

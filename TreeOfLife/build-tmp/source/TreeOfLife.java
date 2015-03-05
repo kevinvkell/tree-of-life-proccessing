@@ -19,7 +19,7 @@ ArrayList<Cluster> clusters;
 
 public void setup() {
     size(sketchWidth(), sketchHeight());
-    table = loadTable("iris_data2.txt", "header, tsv");
+    table = loadTable("iris_data_reduced.txt", "header, tsv");
     clusters = new ArrayList<Cluster>();
 
     for(TableRow row : table.rows()) {
@@ -33,17 +33,50 @@ public void setup() {
     assignY(clusters.get(0), sketchHeight()/2, 0);
     assignX(clusters.get(0), 0, sketchWidth()/findDepth(clusters.get(0)));
 
-    drawCluster(clusters.get(0));
+    drawTree(clusters.get(0));
+}
+
+public void draw() {
+
+}
+
+public void drawTree(Cluster cluster) {
+    fill(255);
+    rect(0, 0, sketchWidth(), sketchHeight());
+
+    drawLines(cluster);
+    drawCluster(cluster);
+}
+
+public void mouseClicked() {
+    print("(", mouseX, ", ", mouseY, ")\n");
+    drawTree(clusters.get(0));
+    drawInfo(clusters.get(0), mouseX, mouseY);
+}
+
+public void drawInfo(Cluster cluster, int x, int y) {
+    if(cluster == null) {
+        return;
+    }
+
+    if(dist(cluster.x, cluster.y, x, y) < 10) {
+        print("hit!\n");
+        fill(0);
+        textSize(10);
+        text(cluster.traits.toString(), cluster.x, cluster.y, 100, 80);
+    }
+    else {
+        drawInfo(cluster.child1, x, y);
+        drawInfo(cluster.child2, x, y);
+    }
 }
 
 public int sketchWidth() {
-    return 2000;
-    // return int(displayWidth * 0.8);
+    return PApplet.parseInt(displayWidth * 0.8f);
 } 
 
 public int sketchHeight() {
-    return 1000;
-    // return int(displayHeight * 0.8);
+    return PApplet.parseInt(displayHeight * 0.8f);
 }
 
 public void drawCluster(Cluster cluster) {
@@ -51,12 +84,33 @@ public void drawCluster(Cluster cluster) {
         return;
     }
 
-    print("(", cluster.x, ", ", cluster.y, ")\n");
+    String name = cluster.traits.name;
+    if(name == null) {
+        fill(123);
+    } else if(name.equals("Iris-virginica")) {
+        fill(228,26,28);
+    } else if(name.equals("Iris-setosa")) {
+        fill(55,126,184);
+    } else if(name.equals("Iris-versicolor")) {
+        fill(77,175,74);
+    }
 
-    fill(123);
-    ellipse(cluster.x, cluster.y, 5, 5);
+
+    ellipse(cluster.x, cluster.y, 10, 10);
     drawCluster(cluster.child1);
     drawCluster(cluster.child2);
+}
+
+public void drawLines(Cluster cluster) {
+    stroke(123);
+    if(cluster.child1 != null) {
+        line(cluster.x, cluster.y, cluster.child1.x, cluster.child1.y);
+        drawLines(cluster.child1);
+    }
+    if(cluster.child2 != null) {
+        line(cluster.x, cluster.y, cluster.child2.x, cluster.child2.y);
+        drawLines(cluster.child2);
+    }
 }
 
 public void assignY(Cluster cluster, int altitude, int parentAltitude) {
@@ -116,6 +170,7 @@ public void combineClosestCluster() {
             if(shortestDistance == -1) {
                 minCluster1 = cluster1;
                 minCluster2 = cluster2;
+                shortestDistance = calculateDistance(cluster1.traits, cluster2.traits);
                 continue;
             }
             float distance = calculateDistance(cluster1.traits, cluster2.traits);
@@ -129,6 +184,7 @@ public void combineClosestCluster() {
 
     clusters.remove(minCluster1);
     clusters.remove(minCluster2);
+
     clusters.add(new Cluster(averageTraits(minCluster1.traits, minCluster2.traits), minCluster1, minCluster2));
 }
 
@@ -173,7 +229,7 @@ class Cluster {
     public String toString() {
         return traits.toString() + 
         "\n\t" + (child1 == null ? "" : child1.toString()) +
-        "\n\t" + (child2 == null ? "" : child2.toString());
+        "\t" + (child2 == null ? "" : child2.toString());
 
     }
 }
@@ -189,7 +245,7 @@ class Traits {
         sepalWidth = row.getFloat("sepal_width");
         petalLength = row.getFloat("petal_length");
         petalWidth = row.getFloat("petal_width");
-        name = row.getString("sample_number");
+        name = row.getString("class");
     }
 
     Traits(float newSepalLength, float newSepalWidth, float newPetalLength, float newPetalWidth) {
@@ -200,10 +256,10 @@ class Traits {
     }
 
     public String toString() {
-        return "Sepal Length: " + sepalLength + "\t"
-            + "Sepal Width: " + sepalWidth + "\t"
-            + "Petal Length: " + petalLength + "\t"
-            + "Petal Width: " + petalWidth + "\t\n";
+        return "Sepal Length: " + (float)(Math.round(sepalLength*100.0f)/100.0f) + " "
+            + "Sepal Width: " + (float)(Math.round(sepalWidth*100.0f)/100.0f) + " "
+            + "Petal Length: " + (float)(Math.round(petalLength*100.0f)/100.0f) + " "
+            + "Petal Width: " + (float)(Math.round(petalWidth*100.0f)/100.0f) + " ";
     }
 }
   static public void main(String[] passedArgs) {

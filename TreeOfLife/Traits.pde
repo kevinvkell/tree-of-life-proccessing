@@ -10,7 +10,7 @@ class Traits {
         sepalWidth = row.getFloat("sepal_width");
         petalLength = row.getFloat("petal_length");
         petalWidth = row.getFloat("petal_width");
-        name = row.getString("sample_number");
+        name = row.getString("class");
     }
 
     Traits(float newSepalLength, float newSepalWidth, float newPetalLength, float newPetalWidth) {
@@ -21,9 +21,9 @@ class Traits {
     }
 
     String toString() {
-        return "Sepal Length: " + sepalLength + "\t"
-            + "Sepal Width: " + sepalWidth + "\t"
-            + "Petal Length: " + petalLength + "\t"
-            + "Petal Width: " + petalWidth + "\t\n";
+        return "Sepal Length: " + (float)(Math.round(sepalLength*100.0)/100.0) + " "
+            + "Sepal Width: " + (float)(Math.round(sepalWidth*100.0)/100.0) + " "
+            + "Petal Length: " + (float)(Math.round(petalLength*100.0)/100.0) + " "
+            + "Petal Width: " + (float)(Math.round(petalWidth*100.0)/100.0) + " ";
     }
 }
