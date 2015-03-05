@@ -1,11 +1,8 @@
-int height = 500;
-int width = 1000;
-
 Table table;
 ArrayList<Cluster> clusters;
 
 void setup() {
-    size(width, height);
+    size(sketchWidth(), sketchHeight());
     table = loadTable("iris_data2.txt", "header, tsv");
     clusters = new ArrayList<Cluster>();
 
@@ -16,50 +13,105 @@ void setup() {
     while(clusters.size() > 1) {
         combineClosestCluster();
     }
+
+    assignY(clusters.get(0), sketchHeight()/2, 0);
+    assignX(clusters.get(0), 0, sketchWidth()/findDepth(clusters.get(0)));
+
+    drawCluster(clusters.get(0));
 }
 
-// void drawTree(Cluster node, int depth, int x, int y) {
-//     ellipse(x, y, 5, 5);
-//     if(node.child1 != null) {
-//         int newHeight = max(height - y)
-//         drawTree(node.child1, depth + 1, )
-//     }
-// }
+public int sketchWidth() {
+    return int(displayWidth * 0.8);
+} 
 
-boolean isLeaf(Cluster cluster) {
+public int sketchHeight() {
+    return int(displayHeight * 0.8);
+}
 
-    if(cluster.name == null) {
-        return false;
+void drawCluster(Cluster cluster) {
+    if(cluster == null) {
+        return;
     }
 
-    return true;
+    print("(", cluster.x, ", ", cluster.y, ")\n");
+
+    fill(123);
+    ellipse(cluster.x, cluster.y, 5, 5);
+    drawCluster(cluster.child1);
+    drawCluster(cluster.child2);
+}
+
+void assignY(Cluster cluster, int altitude, int parentAltitude) {
+    if(cluster == null) {
+        return;
+    }
+
+    cluster.y = altitude;
+    assignY(cluster.child1, altitude + abs(parentAltitude - altitude)/2, altitude);
+    assignY(cluster.child2, altitude - abs(parentAltitude - altitude)/2, altitude);
+}
+
+void assignX(Cluster cluster, int xPos, int interval) {
+    if(cluster == null) {
+        return;
+    }
+
+    cluster.x = xPos;
+    assignX(cluster.child1, xPos + interval, interval);
+    assignX(cluster.child2, xPos + interval, interval);
+}
+
+int findDepth(Cluster cluster) {
+    if(cluster == null) {
+        return 0;
+    }
+
+    return 1 + max(findDepth(cluster.child1), findDepth(cluster.child2));
+}
+
+int farthestUp(Cluster cluster) {
+    if(cluster == null) {
+        return 0;
+    }
+
+    return 1 + farthestUp(cluster.child1);
+}
+
+int farthestDown(Cluster cluster) {
+    if(cluster == null) {
+        return 0;
+    }
+
+    return 1 + farthestDown(cluster.child1);
 }
 
 void combineClosestCluster() {
-    float shortestDistance = null;
-    Cluster cluster1;
-    Cluster cluster2;
+    float shortestDistance = -1;
+    Cluster minCluster1 = null;
+    Cluster minCluster2 = null;
 
-    for(int i=0; i<clusters.size(); i++) {
-        for(int j=i+1; j<clusters.size(); j++) {
-            if(shortestDistance = null) {
-                cluster1 = clusters.get(i);
-                cluster2 = clusters.get(j);
+    for(Cluster cluster1 : clusters) {
+        for(Cluster cluster2 : clusters) {
+            if(cluster1 == cluster2) {
                 continue;
             }
-
-            float distance = calculateDistance(clusters.get(i), clusters.get(j)) < shortestDistance;
+            if(shortestDistance == -1) {
+                minCluster1 = cluster1;
+                minCluster2 = cluster2;
+                continue;
+            }
+            float distance = calculateDistance(cluster1.traits, cluster2.traits);
             if(distance < shortestDistance) {
                 shortestDistance = distance;
-                cluster1 = clusters.get(i);
-                cluster2 = clusters.get(j);
+                minCluster1 = cluster1;
+                minCluster2 = cluster2;
             }
         }
     }
 
-    clusters.remove(cluster1);
-    clusters.remove(cluster2);
-    clusters.add(new Cluster(averageTraits(cluster1.traits, cluster2.traits), cluster1, cluster2));
+    clusters.remove(minCluster1);
+    clusters.remove(minCluster2);
+    clusters.add(new Cluster(averageTraits(minCluster1.traits, minCluster2.traits), minCluster1, minCluster2));
 }
 
 Traits averageTraits(Traits traits1, Traits traits2) {
@@ -74,51 +126,10 @@ Traits averageTraits(Traits traits1, Traits traits2) {
 float calculateDistance(Traits iris1, Traits iris2) {
     float sum = 0;
 
-    sum += abs(iris1.traits.sepalLength - iris2.traits.sepalLength);
-    sum += abs(iris1.traits.sepalWidth - iris2.traits.sepalWidth);
-    sum += abs(iris1.traits.petalLength - iris2.traits.petalLength);
-    sum += abs(iris1.traits.petalWidth - iris2.traits.petalWidth);
+    sum += abs(iris1.sepalLength - iris2.sepalLength);
+    sum += abs(iris1.sepalWidth - iris2.sepalWidth);
+    sum += abs(iris1.petalLength - iris2.petalLength);
+    sum += abs(iris1.petalWidth - iris2.petalWidth);
 
     return sum;
-}
-
-class Traits {
-    float sepalLength;
-    float sepalWidth;
-    float petalLength;
-    float petalWidth;
-    String name = null;
-
-    Traits(TableRow row) {
-        sepalLength = row.getFloat("sepal_length");
-        sepalWidth = row.getFloat("sepal_width");
-        petalLength = row.getFloat("petal_length");
-        petalWidth = row.getFloat("petal_width");
-        name = row.getString("sample_number");
-    }
-
-    Traits(float newSepalLength, float newSepalWidth, float newPetalLength, float newPetalWidth) {
-        sepalLength = newSepalLength;
-        sepalWidth = newSepalWidth;
-        petalLength = newPetalLength;
-        petalWidth = newPetalWidth;
-    }
-}
-
-class Cluster {
-    Traits traits;
-    Cluster child1;
-    Cluster child2;
-
-    Cluster(Traits newTraits) {
-        traits = newTraits;
-        child1 = null;
-        child2 = null;
-    }
-
-    Cluster(Traits newTraits, Cluster newChild1, Cluster newChild2) {
-        traits = newTraits;
-        child1 = newChild1;
-        child2 = newChild2;
-    }
 }
