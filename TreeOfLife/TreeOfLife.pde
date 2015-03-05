@@ -33,7 +33,6 @@ void drawTree(Cluster cluster) {
 }
 
 void mouseClicked() {
-    print("(", mouseX, ", ", mouseY, ")\n");
     drawTree(clusters.get(0));
     drawInfo(clusters.get(0), mouseX, mouseY);
 }
@@ -44,7 +43,6 @@ void drawInfo(Cluster cluster, int x, int y) {
     }
 
     if(dist(cluster.x, cluster.y, x, y) < 10) {
-        print("hit!\n");
         fill(0);
         textSize(10);
         text(cluster.traits.toString(), cluster.x, cluster.y, 100, 80);
