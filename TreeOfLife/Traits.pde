@@ -24,6 +24,7 @@ class Traits {
         return "Sepal Length: " + (float)(Math.round(sepalLength*100.0)/100.0) + " "
             + "Sepal Width: " + (float)(Math.round(sepalWidth*100.0)/100.0) + " "
             + "Petal Length: " + (float)(Math.round(petalLength*100.0)/100.0) + " "
-            + "Petal Width: " + (float)(Math.round(petalWidth*100.0)/100.0) + " ";
+            + "Petal Width: " + (float)(Math.round(petalWidth*100.0)/100.0) + " "
+            + (name==null ? "" : "Type: " + name);
     }
 }

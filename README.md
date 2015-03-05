@@ -1,16 +1,18 @@
 # tree-of-life-proccessing
 Generates a tree based on iris data using processing
 
-This doesn't quite work. It does the clustering part, but I never got to the drawing part. 
+##Changes
+I've changed this project in that before it did not work at all, but now it works pretty well.
+I had to change the way it clustered the nodes since before there was an issue where it was not
+actually grouping similar clusters. I also added a method of traversing the resulting clusters
+and determining the x and y coordinates of each node. Using that data, I draw the nodes and connect
+them with lines. 
 
-It does the clustering based on the magnitude of differences between each iris sample. 
-It generates a distance by finding the sum of the absoloute value of the differences between
-the four measurements for each iris sample. It first makes a cluster out of each measurement, 
-then it finds the closest two clusters and merges them. The new cluster has the average of
-it's children's measurements. It does this until there is only one cluster. The part I did not 
-finish is the part that draws these clusters into a tree. I was going to try to draw the tree
-recursively, keeping track of the depth of recursion. I would draw the node based on it's depth. 
-
-I used the algorithm at http://home.deib.polimi.it/matteucc/Clustering/tutorial_html/hierarchical.html
-
-To run, open the TreeOfLife.pde file in processing and press play. 
+##Use
+<code>TreeOfLife.pde</code> reads the file named <code>iris_data_reduced.txt</code> and generates nodes based
+on each entry's data. It clusters the nodes together with other nodes with similar attributes.
+I read from this file, because I found that my method of drawing the tree works best 
+for smaller data sets than I was working with originally. The original data set exists in the other two file
+in the Data folder. The terminal nodes are labeled different colors based on the type of iris they are. 
+The tree shows that irises of the same type are grouped more closely together. By clicking on a node, a user
+can see the attributes at that node. 
